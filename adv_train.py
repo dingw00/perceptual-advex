@@ -75,12 +75,23 @@ if __name__ == '__main__':
             args.num_epochs = 100
     elif args.optim == 'sgd':
         if args.dataset.startswith('cifar'):
-            if args.lr is None:
-                args.lr = 1e-1
-            if args.lr_schedule is None:
-                args.lr_schedule = '75,90,100'
-            if args.num_epochs is None:
-                args.num_epochs = 100
+            if "resnet" in args.arch:
+                if args.lr is None:
+                    args.lr = 1e-1
+                if args.lr_schedule is None:
+                    args.lr_schedule = '75,90,100'
+                if args.num_epochs is None:
+                    args.num_epochs = 100
+            elif args.arch == "trades-wrn":
+                if args.lr is None:
+                    args.lr = 1e-1
+                if args.lr_schedule is None:
+                    args.lr_schedule = '80,140'
+                if args.num_epochs is None:
+                    args.num_epochs = 200
+            else:
+                print(args.arch, "for cifar dataset!!!!")
+        
         elif (
             args.dataset.startswith('imagenet')
             or args.dataset == 'bird_or_bicycle'
@@ -336,11 +347,11 @@ if __name__ == '__main__':
         # VALIDATION
         print('BEGIN VALIDATION')
         model.eval()
-
-        evaluation.evaluate_against_attacks(
-            model, validation_attacks, val_loader, parallel=args.parallel,
-            writer=writer, iteration=iteration, num_batches=args.val_batches,
-        )
+        if (epoch + 1) % 20 == 0:
+            evaluation.evaluate_against_attacks(
+                model, validation_attacks, val_loader, parallel=args.parallel,
+                writer=writer, iteration=iteration, num_batches=args.val_batches,
+            )
 
         checkpoint_fname = os.path.join(log_dir, f'{epoch:04d}.ckpt.pth')
         print(f'CHECKPOINT {checkpoint_fname}')

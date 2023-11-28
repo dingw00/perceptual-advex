@@ -176,6 +176,36 @@ class CifarResNetFeatureModel(FeatureModel):
         x = x.view(x.size(0), -1)
         x = self.model.linear(x)
         return x
+    
+class CifarWideResNetFeatureModel(FeatureModel):
+    model: TradesWideResNet
+
+    def __init__(self, attacker_model):
+        super().__init__()
+        self.normalizer = attacker_model.normalizer
+        self.model = attacker_model.model
+
+    def features(self, x):
+        x = self.normalizer(x)
+
+        x = self.model.conv1(x)
+
+        x = self.model.block1(x)
+        x_block1 = x
+        x = self.model.block2(x)
+        x_block2 = x
+        x = self.model.block3(x)
+        x_block3 = x
+
+        return (x_block1, x_block2, x_block3)
+
+    def classifier(self, last_block):
+
+        x = self.model.relu(self.model.bn1(last_block))
+        x = F.avg_pool2d(x, 8)
+        x = x.view(-1, self.model.nChannels)
+
+        return x
 
 
 class ImageNetResNetFeatureModel(FeatureModel):

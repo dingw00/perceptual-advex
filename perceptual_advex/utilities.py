@@ -10,7 +10,8 @@ from robustness.attacker import AttackerModel
 from advex_uar.common import pyt_common as uar_common
 
 from .models import CifarResNetFeatureModel, ImageNetResNetFeatureModel, \
-    AlexNetFeatureModel, CifarAlexNet, VGG16FeatureModel, TradesWideResNet
+    AlexNetFeatureModel, CifarAlexNet, VGG16FeatureModel, TradesWideResNet, \
+    CifarWideResNetFeatureModel
 from . import datasets
 
 
@@ -109,6 +110,7 @@ def get_dataset_model(
                 pytorch_pretrained=pytorch_pretrained,
                 parallel=False,
             )
+            print("ckpt:", _)
         except RuntimeError as error:
             if 'state_dict' in str(error):
                 model, _ = make_and_restore_model(
@@ -126,9 +128,10 @@ def get_dataset_model(
                         raise error
             else:
                 raise error  # type: ignore
+        
     elif arch == 'trades-wrn':
         model = TradesWideResNet()
-        if checkpoint_fname is not None:
+        if checkpoint_fname is not None: # if load a pretrained model or not
             state = torch.load(checkpoint_fname)
             model.load_state_dict(state)
     elif hasattr(torchvision_models, arch):
@@ -175,6 +178,12 @@ def get_dataset_model(
             raise RuntimeError('Unsupported dataset.')
     elif arch == 'trades-wrn':
         pass  # We can't use this as a FeatureModel yet.
+        if not isinstance(model, AttackerModel):
+            model = AttackerModel(model, dataset)
+        if dataset_name.startswith('cifar'):
+            model = CifarWideResNetFeatureModel(model)
+        else:
+            raise RuntimeError('Unsupported dataset.')
     else:
         raise RuntimeError(f'Unsupported architecture {arch}.')
 

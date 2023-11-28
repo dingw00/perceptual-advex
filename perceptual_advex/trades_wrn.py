@@ -52,7 +52,8 @@ class NetworkBlock(nn.Module):
 
 
 class TradesWideResNet(nn.Module):
-    def __init__(self, depth=34, num_classes=10, widen_factor=10, dropRate=0.0):
+    # def __init__(self, depth=34, num_classes=10, widen_factor=10, dropRate=0.0):
+    def __init__(self, depth=40, num_classes=10, widen_factor=2, dropRate=0.3):
         super().__init__()
         nChannels = [16, 16 * widen_factor, 32 * widen_factor, 64 * widen_factor]
         assert ((depth - 4) % 6 == 0)
