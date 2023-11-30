@@ -179,6 +179,11 @@ def get_dataset_model(
     elif arch == 'trades-wrn':
         pass  # We can't use this as a FeatureModel yet.
         if not isinstance(model, AttackerModel):
+            
+            #TODO
+            dataset.mean = torch.tensor([0.49139968, 0.48215827, 0.44653124])
+            dataset.std =  torch.tensor([0.24703233, 0.24348505, 0.26158768])
+
             model = AttackerModel(model, dataset)
         if dataset_name.startswith('cifar'):
             model = CifarWideResNetFeatureModel(model)

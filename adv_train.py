@@ -110,6 +110,11 @@ if __name__ == '__main__':
     random.seed(args.seed)
 
     dataset, model = get_dataset_model(args)
+    
+
+
+    print(dataset.mean, dataset.std)
+
     if isinstance(model, FeatureModel):
         model.allow_train()
     if torch.cuda.is_available():
@@ -123,7 +128,7 @@ if __name__ == '__main__':
 
     train_loader, val_loader = dataset.make_loaders(
         workers=4, batch_size=args.batch_size)
-
+    
     attacks = [eval(attack_str) for attack_str in args.attack]
     validation_attacks = [
         NoAttack(),
@@ -330,6 +335,13 @@ if __name__ == '__main__':
         for lr_drop_epoch in lr_drop_epochs:
             if epoch >= lr_drop_epoch:
                 lr *= 0.1
+
+        print('BEGIN VALIDATION')
+        model.eval()
+        evaluation.evaluate_against_attacks(
+            model, [NoAttack()], val_loader, parallel=args.parallel,
+            writer=writer, iteration=iteration, num_batches=args.val_batches,
+        )
 
         print(f'START EPOCH {epoch:04d} (lr={lr:.0e})')
         for batch_index, (inputs, labels) in enumerate(train_loader):

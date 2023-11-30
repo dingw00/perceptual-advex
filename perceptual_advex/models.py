@@ -204,6 +204,7 @@ class CifarWideResNetFeatureModel(FeatureModel):
         x = self.model.relu(self.model.bn1(last_block))
         x = F.avg_pool2d(x, 8)
         x = x.view(-1, self.model.nChannels)
+        x = self.model.fc(x)
 
         return x
 
