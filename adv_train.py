@@ -20,9 +20,11 @@ VAL_ITERS = 100
 
 
 if __name__ == '__main__':
+    print("Cuda:", torch.cuda.is_available())
     parser = argparse.ArgumentParser()
 
-    add_dataset_model_arguments(parser)
+    include_checkpoint = True
+    add_dataset_model_arguments(parser,include_checkpoint=include_checkpoint)
 
     parser.add_argument('--num_epochs', type=int, required=False,
                         help='number of epochs trained')
